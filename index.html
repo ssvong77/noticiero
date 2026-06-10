@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Te Lo Cuento - Producción Pro</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 10px;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #0a0a0a;
+        }
+
+        .container {
+            background-color: rgba(30, 30, 30, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+            width: 100%;
+            max-width: 700px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #00d2ff;
+            margin-top: 0;
+            text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+            font-size: 1.5rem;
+        }
+        h2 {
+            border-bottom: 2px solid #00d2ff;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            color: #ffffff;
+        }
+        .form-group { margin-bottom: 15px; }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+        input[type="file"], input[type="range"], select, input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background-color: #2d2d2d;
+            color: #fff;
+            font-size: 14px;
+        }
+        input[type="file"]::file-selector-button {
+            background-color: #00d2ff;
+            color: #000;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 10px;
+            transition: background 0.2s;
+        }
+        input[type="file"]::file-selector-button:hover { background-color: #33ddff; }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            color: #fff;
+            font-size: 0.95rem;
+        }
+        .checkbox-label input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #00d2ff;
+        }
+
+        .collapsible-options {
+            display: none;
+            margin-top: 10px;
+            padding: 15px;
+            background-color: rgba(0, 210, 255, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid #00d2ff;
+        }
+        .collapsible-options.visible {
+            display: block;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex: 1;
+            min-width: 100px;
+        }
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-play { background-color: #28a745; color: white; }
+        .btn-stop { background-color: #dc3545; color: white; }
+        .btn-export { background-color: #007bff; color: white; }
+        .btn-reset { background-color: #6c757d; color: white; }
+        .btn-small {
+            padding: 6px 10px;
+            font-size: 11px;
+            min-width: auto;
+            flex: 0 0 auto;
+            background-color: #3d3d3d;
+            color: white;
+            text-transform: none;
+        }
+        .btn-small:hover { background-color: #505050; }
+        .btn-auto {
+            background-color: #00d2ff;
+            color: #000;
+            font-weight: bold;
+            padding: 8px 12px;
+            font-size: 12px;
+            min-width: auto;
+            flex: 0 0 auto;
+        }
+
+        .timer-display {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1rem;
+            color: #00d2ff;
+            font-weight: bold;
+            min-height: 30px;
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16/9;
+            background-color: #000000;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #444;
+            display: block;
+        }
+        
+        @media (orientation: portrait) and (max-width: 768px) {
+            canvas { aspect-ratio: 9/16; max-height: 70vh; }
+        }
+        @media (min-width: 769px) {
+            canvas { aspect-ratio: 16/9; height: 350px; }
+        }
+
+        audio, video { display: none; }
+
+        .preview-panel {
+            margin-top: 12px;
+            padding: 12px;
+            background-color: rgba(0, 210, 255, 0.1);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .seek-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .slider-container {
+            flex: 1;
+            min-width: 120px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .custom-slider {
+            flex: 1;
+            padding: 0 !important;
+            height: 24px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        .custom-slider::-webkit-slider-runnable-track { height: 6px; background: #555; border-radius: 3px; }
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none; width: 18px; height: 18px;
+            background: #00d2ff; border-radius: 50%; margin-top: -6px;
+            box-shadow: 0 0 6px rgba(0, 210, 255, 0.6);
+        }
+        .custom-slider::-moz-range-track { height: 6px; background: #555; border-radius: 3px; }
+        .custom-slider::-moz-range-thumb {
+            width: 18px; height: 18px; background: #00d2ff; border-radius: 50%; border: none;
+            box-shadow: 0 0 6px rgba(0, 210, 255, 0.6);
+        }
+        .time-label {
+            font-family: monospace;
+            font-size: 11px;
+            color: #00d2ff;
+            min-width: 42px;
+            text-align: center;
+        }
+        .controls-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .controls-row button {
+            padding: 8px 12px;
+            font-size: 12px;
+            min-width: auto;
+            flex: 0 0 auto;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+        .btn-mark { background-color: #ff9800; color: white; font-weight: bold; }
+        .btn-mark:hover { background-color: #ffa726; }
+        .mark-display {
+            font-family: monospace;
+            font-weight: bold;
+            color: #4CAF50;
+            font-size: 0.9rem;
+            margin-left: auto;
+            background-color: rgba(76, 175, 80, 0.15);
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(76, 175, 80, 0.4);
+        }
+
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .video-modal h3 { color: #00d2ff; margin: 0 0 10px 0; text-align: center; }
+        .video-modal p { color: #ccc; font-size: 14px; text-align: center; margin-bottom: 15px; max-width: 400px; line-height: 1.4; }
+        .video-modal video { max-width: 100%; max-height: 60vh; border-radius: 8px; border: 1px solid #444; background: #000; }
+        .video-modal .modal-buttons { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 300px; }
+        .video-modal .modal-buttons button { flex: 1; min-width: 120px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Te Lo Cuento - Producción Pro</h1>
+        <h2>Configuración de Producción</h2>
+        
+        <div class="form-group">
+            <label for="fondo">1. Fondo (Video del reportaje/entrevista):</label>
+            <input type="file" id="fondo" accept="video/*,image/*">
+            <div class="preview-panel" id="videoPreviewPanel" style="display: none;">
+                <div class="seek-row">
+                    <button type="button" class="btn-small" id="btnVidSeekBack10">◀◀ 10s</button>
+                    <button type="button" class="btn-small" id="btnVidSeekBack1">◀ 1s</button>
+                    <div class="slider-container">
+                        <span class="time-label" id="vidCurrentTime">0:00</span>
+                        <input type="range" class="custom-slider" id="vidSlider" value="0" min="0" max="100" step="0.1">
+                        <span class="time-label" id="vidDuration">0:00</span>
+                    </div>
+                    <button type="button" class="btn-small" id="btnVidSeekFwd1">1s ▶</button>
+                    <button type="button" class="btn-small" id="btnVidSeekFwd10">10s ▶▶</button>
+                </div>
+                <div class="controls-row">
+                    <button type="button" id="btnVidPreviewPlay" class="btn-play">▶ Preview</button>
+                    <button type="button" id="btnVidPreviewPause" class="btn-stop">⏸ Pausar</button>
+                    <button type="button" id="btnVidMarkStart" class="btn-mark">⏱ Marcar inicio aquí</button>
+                    <span class="mark-display" id="vidMarkDisplay">Inicio: 0.00s</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="audioPrincipal">2. Audio Principal (Voz del presentador):</label>
+            <input type="file" id="audioPrincipal" accept="audio/*">
+        </div>
+
+        <div class="form-group">
+            <label for="cortinaMusical">3. Cortina Musical de Fondo (Opcional):</label>
+            <input type="file" id="cortinaMusical" accept="audio/*">
+            <div class="preview-panel" id="musicPreviewPanel" style="display: none;">
+                <div class="seek-row">
+                    <button type="button" class="btn-small" id="btnMusSeekBack10">◀◀ 10s</button>
+                    <button type="button" class="btn-small" id="btnMusSeekBack1">◀ 1s</button>
+                    <div class="slider-container">
+                        <span class="time-label" id="musCurrentTime">0:00</span>
+                        <input type="range" class="custom-slider" id="musSlider" value="0" min="0" max="100" step="0.1">
+                        <span class="time-label" id="musDuration">0:00</span>
+                    </div>
+                    <button type="button" class="btn-small" id="btnMusSeekFwd1">1s ▶</button>
+                    <button type="button" class="btn-small" id="btnMusSeekFwd10">10s ▶▶</button>
+                </div>
+                <div class="controls-row">
+                    <button type="button" id="btnMusPreviewPlay" class="btn-play">▶ Preview</button>
+                    <button type="button" id="btnMusPreviewPause" class="btn-stop">⏸ Pausar</button>
+                    <button type="button" id="btnMusMarkStart" class="btn-mark">⏱ Marcar inicio aquí</button>
+                    <span class="mark-display" id="musMarkDisplay">Inicio: 0.00s</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="volumenVideo">Volumen del Video de Fondo: <span id="volVidValue">30</span>%</label>
+            <input type="range" id="volumenVideo" min="0" max="100" value="30">
+        </div>
+
+        <div class="form-group">
+            <label for="volumenCortina">Volumen de la Cortina Musical: <span id="volMusValue">20</span>%</label>
+            <input type="range" id="volumenCortina" min="0" max="100" value="20">
+        </div>
+
+        <div class="form-group">
+            <label class="checkbox-label">
+                <input type="checkbox" id="activarGraficos">
+                Activar Gráficos de Noticiero
+            </label>
+            <div class="collapsible-options" id="opcionesGraficos">
+                <label for="textoTitular">Titular Principal (Lower Third):</label>
+                <input type="text" id="textoTitular" placeholder="Ej: GRAVE ACCIDENTE EN EL CRUCE SAN JOSÉ" maxlength="80">
+                
+                <label class="checkbox-label" style="margin-top: 12px;">
+                    <input type="checkbox" id="activarFechaLugar">
+                    Mostrar Fecha, Hora y Lugar (Upper Third)
+                </label>
+                <div class="collapsible-options" id="opcionesFechaLugar" style="border-left-color: #ff9800; background-color: rgba(255, 152, 0, 0.05);">
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="textoFechaLugar" placeholder="Ej: 📍 APÓSTOLES | 📅 24 OCT 2023 - 14:30" style="flex: 1;">
+                        <button type="button" id="btnAutoFecha" class="btn-auto">🔄 Auto</button>
+                    </div>
+                </div>
+
+                <label class="checkbox-label" style="margin-top: 12px;">
+                    <input type="checkbox" id="activarEnVivo">
+                    Mostrar badge "🔴 EN VIVO"
+                </label>
+
+                <label for="colorBanda" style="margin-top: 12px;">Color de la Banda del Titular:</label>
+                <select id="colorBanda">
+                    <option value="#dc3545">🔴 Rojo (Urgente / Última Hora)</option>
+                    <option value="#00d2ff">🔵 Cian (Corporativo / Tecnológico)</option>
+                    <option value="#1a1a1a">⚫ Negro (Elegante / Neutro)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="orientacion">Orientación del Video:</label>
+            <select id="orientacion">
+                <option value="auto">Automática (detectar dispositivo)</option>
+                <option value="landscape">Horizontal (16:9) - PC</option>
+                <option value="portrait">Vertical (9:16) - Celular/Redes</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="efectoOndas">Efectos de Visualización (Sobre el fondo):</label>
+            <select id="efectoOndas">
+                <option value="barras">Barras de Frecuencia (Inferior)</option>
+                <option value="ondas_suaves">Onda Suave (Línea Única)</option>
+                <option value="circulos">Círculos Concéntricos (Simétricos)</option>
+                <option value="particulas">Partículas Reactivas (Simétricas)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="tiempoExtra">Tiempo extra después del audio principal:</label>
+            <select id="tiempoExtra">
+                <option value="0">Sin tiempo extra</option>
+                <option value="5">5 segundos extra</option>
+                <option value="10" selected>10 segundos extra (recomendado)</option>
+                <option value="15">15 segundos extra</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="introVisual">Intro visual (Retraso de la voz):</label>
+            <select id="introVisual">
+                <option value="0">Sin retraso (Arranca con la voz)</option>
+                <option value="1">1 segundo</option>
+                <option value="2" selected>2 segundos (Recomendado)</option>
+                <option value="3">3 segundos</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="duracionMaxima">Duración máxima del video:</label>
+            <select id="duracionMaxima">
+                <option value="completa">Video completo (dure lo que dure)</option>
+                <option value="30">30 segundos</option>
+                <option value="60">60 segundos</option>
+                <option value="90" selected>90 segundos (WhatsApp)</option>
+                <option value="120">120 segundos</option>
+            </select>
+        </div>
+
+        <div class="buttons">
+            <button class="btn-play" id="btnReproducir">▶ Reproducir</button>
+            <button class="btn-stop" id="btnDetener">⏹ Detener</button>
+            <button class="btn-export" id="btnExportar">💾 Exportar</button>
+            <button class="btn-reset" id="btnReiniciar">↺ Reiniciar</button>
+        </div>
+
+        <div class="timer-display" id="timerDisplay"></div>
+        <canvas id="visualizador"></canvas>
+    </div>
+
+    <div id="videoModal" class="video-modal">
+        <h3>🎬 ¡Video Listo!</h3>
+        <p>Si no se guardó automáticamente, <strong>mantén presionado el video</strong> y selecciona <em>"Añadir a Fotos"</em> o <em>"Guardar video"</em>.</p>
+        <video id="modalVideo" controls playsinline></video>
+        <div class="modal-buttons">
+            <button id="btnModalDownload" class="btn-export">⬇️ Forzar Descarga</button>
+            <button id="btnModalClose" class="btn-reset">Cerrar</button>
+        </div>
+    </div>
+
+    <audio id="audioPrincipalEl" crossorigin="anonymous"></audio>
+    <audio id="cortinaMusicalEl" crossorigin="anonymous"></audio>
+    <video id="bgVideoEl" crossorigin="anonymous" playsinline></video>
+
+    <script>
+        const canvas = document.getElementById('visualizador');
+        const ctx = canvas.getContext('2d');
+        
+        const inputFondo = document.getElementById('fondo');
+        const inputAudioPrincipal = document.getElementById('audioPrincipal');
+        const inputCortina = document.getElementById('cortinaMusical');
+        
+        const audioPrincipalEl = document.getElementById('audioPrincipalEl');
+        const cortinaMusicalEl = document.getElementById('cortinaMusicalEl');
+        const bgVideoEl = document.getElementById('bgVideoEl');
+        
+        const sliderVolumenVideo = document.getElementById('volumenVideo');
+        const volVidValue = document.getElementById('volVidValue');
+        const sliderVolumenCortina = document.getElementById('volumenCortina');
+        const volMusValue = document.getElementById('volMusValue');
+        
+        const selectorEfecto = document.getElementById('efectoOndas');
+        const selectorTiempoExtra = document.getElementById('tiempoExtra');
+        const selectorOrientacion = document.getElementById('orientacion');
+        const selectorDuracionMaxima = document.getElementById('duracionMaxima');
+        const selectorIntroVisual = document.getElementById('introVisual');
+
+        const activarGraficos = document.getElementById('activarGraficos');
+        const opcionesGraficos = document.getElementById('opcionesGraficos');
+        const textoTitular = document.getElementById('textoTitular');
+        const activarFechaLugar = document.getElementById('activarFechaLugar');
+        const opcionesFechaLugar = document.getElementById('opcionesFechaLugar');
+        const textoFechaLugar = document.getElementById('textoFechaLugar');
+        const btnAutoFecha = document.getElementById('btnAutoFecha');
+        const activarEnVivo = document.getElementById('activarEnVivo');
+        const colorBanda = document.getElementById('colorBanda');
+
+        const btnReproducir = document.getElementById('btnReproducir');
+        const btnDetener = document.getElementById('btnDetener');
+        const btnReiniciar = document.getElementById('btnReiniciar');
+        const btnExportar = document.getElementById('btnExportar');
+        const timerDisplay = document.getElementById('timerDisplay');
+
+        let audioCtx, analyser, videoGainNode, musicGainNode, compressorNode;
+        let isInitialized = false;
+        let isPlaying = false;
+        let animationId;
+        let backgroundMedia = null;
+
+        let audioEnded = false;
+        let voiceStarted = false;
+
+        let mediaRecorder, recordedChunks = [], isRecording = false;
+        let audioDestination, autoStopTimeout = null, introDelayTimeout = null;
+
+        let videoStartTime = 0, musicStartTime = 0;
+        let currentBlobUrl = null, currentFileName = null;
+
+        // UI Toggles
+        activarGraficos.addEventListener('change', () => opcionesGraficos.classList.toggle('visible', activarGraficos.checked));
+        activarFechaLugar.addEventListener('change', () => opcionesFechaLugar.classList.toggle('visible', activarFechaLugar.checked));
+        
+        // === MODIFICACIÓN: Default a Apóstoles ===
+        btnAutoFecha.addEventListener('click', () => {
+            const now = new Date();
+            const options = { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+            textoFechaLugar.value = `📍 APÓSTOLES | 📅 ${now.toLocaleDateString('es-ES', options).replace(',', ' -')}`;
+        });
+        // ==========================================
+
+        function resizeCanvas() {
+            const orientacion = selectorOrientacion.value;
+            if (orientacion === 'auto') {
+                if (window.innerWidth <= 768 && window.innerHeight > window.innerWidth) {
+                    canvas.width = 540; canvas.height = 960;
+                } else {
+                    canvas.width = 960; canvas.height = 540;
+                }
+            } else if (orientacion === 'portrait') {
+                canvas.width = 540; canvas.height = 960;
+            } else {
+                canvas.width = 960; canvas.height = 540;
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+        selectorOrientacion.addEventListener('change', resizeCanvas);
+        setTimeout(resizeCanvas, 100);
+
+        inputFondo.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const url = URL.createObjectURL(file);
+            if (file.type.startsWith('video/')) {
+                backgroundMedia = bgVideoEl;
+                backgroundMedia.src = url;
+                backgroundMedia.loop = true;
+                backgroundMedia.muted = false;
+                backgroundMedia.volume = 1.0;
+                document.getElementById('videoPreviewPanel').style.display = 'flex';
+                videoStartTime = 0;
+                document.getElementById('vidMarkDisplay').textContent = 'Inicio: 0.00s';
+                document.getElementById('vidSlider').value = 0;
+                document.getElementById('vidCurrentTime').textContent = '0:00';
+                document.getElementById('vidDuration').textContent = '0:00';
+            } else {
+                backgroundMedia = new Image();
+                backgroundMedia.src = url;
+                document.getElementById('videoPreviewPanel').style.display = 'none';
+            }
+        });
+
+        inputAudioPrincipal.addEventListener('change', function(e) {
+            if (e.target.files[0]) audioPrincipalEl.src = URL.createObjectURL(e.target.files[0]);
+        });
+
+        inputCortina.addEventListener('change', function(e) {
+            if (e.target.files[0]) {
+                cortinaMusicalEl.src = URL.createObjectURL(e.target.files[0]);
+                document.getElementById('musicPreviewPanel').style.display = 'flex';
+                musicStartTime = 0;
+                document.getElementById('musMarkDisplay').textContent = 'Inicio: 0.00s';
+                document.getElementById('musSlider').value = 0;
+                document.getElementById('musCurrentTime').textContent = '0:00';
+                document.getElementById('musDuration').textContent = '0:00';
+            }
+        });
+
+        function setupAudio() {
+            if (isInitialized) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 256;
+            
+            videoGainNode = audioCtx.createGain();
+            videoGainNode.gain.value = sliderVolumenVideo.value / 100;
+            
+            musicGainNode = audioCtx.createGain();
+            musicGainNode.gain.value = sliderVolumenCortina.value / 100;
+            
+            compressorNode = audioCtx.createDynamicsCompressor();
+            compressorNode.threshold.value = -3;
+            compressorNode.knee.value = 0;
+            compressorNode.ratio.value = 20;
+            compressorNode.attack.value = 0.003;
+            compressorNode.release.value = 0.25;
+            
+            audioDestination = audioCtx.createMediaStreamDestination();
+
+            audioPrincipalEl.volume = 1.0;
+            bgVideoEl.volume = 1.0;
+            cortinaMusicalEl.volume = 1.0;
+
+            if (audioPrincipalEl.src) {
+                const sourcePrincipal = audioCtx.createMediaElementSource(audioPrincipalEl);
+                sourcePrincipal.connect(analyser);
+                analyser.connect(audioDestination);
+                analyser.connect(audioCtx.destination);
+            }
+            
+            if (backgroundMedia && backgroundMedia.tagName === 'VIDEO') {
+                const sourceVideo = audioCtx.createMediaElementSource(bgVideoEl);
+                sourceVideo.connect(videoGainNode);
+                videoGainNode.connect(compressorNode);
+            }
+            
+            if (cortinaMusicalEl.src) {
+                const sourceMusic = audioCtx.createMediaElementSource(cortinaMusicalEl);
+                sourceMusic.connect(musicGainNode);
+                musicGainNode.connect(compressorNode);
+            }
+            
+            compressorNode.connect(audioDestination);
+            compressorNode.connect(audioCtx.destination);
+            isInitialized = true;
+        }
+
+        sliderVolumenVideo.addEventListener('input', function() {
+            volVidValue.textContent = this.value;
+            if (videoGainNode && audioCtx) {
+                videoGainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+                videoGainNode.gain.setValueAtTime(this.value / 100, audioCtx.currentTime);
+            }
+        });
+
+        sliderVolumenCortina.addEventListener('input', function() {
+            volMusValue.textContent = this.value;
+            if (musicGainNode && audioCtx) {
+                musicGainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+                musicGainNode.gain.setValueAtTime(this.value / 100, audioCtx.currentTime);
+            }
+        });
+
+        function formatTime(seconds) {
+            if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Video Controls
+        bgVideoEl.addEventListener('loadedmetadata', () => {
+            document.getElementById('vidSlider').max = bgVideoEl.duration;
+            document.getElementById('vidDuration').textContent = formatTime(bgVideoEl.duration);
+            if (isPlaying) draw();
+        });
+        bgVideoEl.addEventListener('timeupdate', () => {
+            if (!document.getElementById('vidSlider').dragging) {
+                document.getElementById('vidSlider').value = bgVideoEl.currentTime;
+            }
+            document.getElementById('vidCurrentTime').textContent = formatTime(bgVideoEl.currentTime);
+        });
+        document.getElementById('vidSlider').addEventListener('mousedown', () => { if (backgroundMedia?.tagName === 'VIDEO') document.getElementById('vidSlider').dragging = true; });
+        document.getElementById('vidSlider').addEventListener('touchstart', () => { if (backgroundMedia?.tagName === 'VIDEO') document.getElementById('vidSlider').dragging = true; });
+        document.getElementById('vidSlider').addEventListener('mouseup', () => {
+            if (backgroundMedia?.tagName === 'VIDEO') {
+                document.getElementById('vidSlider').dragging = false;
+                bgVideoEl.currentTime = parseFloat(document.getElementById('vidSlider').value);
+            }
+        });
+        document.getElementById('vidSlider').addEventListener('touchend', () => {
+            if (backgroundMedia?.tagName === 'VIDEO') {
+                document.getElementById('vidSlider').dragging = false;
+                bgVideoEl.currentTime = parseFloat(document.getElementById('vidSlider').value);
+            }
+        });
+        document.getElementById('vidSlider').addEventListener('input', () => {
+            if (backgroundMedia?.tagName === 'VIDEO') {
+                document.getElementById('vidCurrentTime').textContent = formatTime(parseFloat(document.getElementById('vidSlider').value));
+                if (bgVideoEl.paused) bgVideoEl.currentTime = parseFloat(document.getElementById('vidSlider').value);
+            }
+        });
+        document.getElementById('btnVidPreviewPlay').addEventListener('click', () => { if (backgroundMedia?.tagName === 'VIDEO') bgVideoEl.play(); });
+        document.getElementById('btnVidPreviewPause').addEventListener('click', () => { if (backgroundMedia?.tagName === 'VIDEO') bgVideoEl.pause(); });
+        document.getElementById('btnVidMarkStart').addEventListener('click', () => {
+            if (backgroundMedia?.tagName === 'VIDEO') {
+                videoStartTime = bgVideoEl.currentTime;
+                bgVideoEl.pause();
+                document.getElementById('vidMarkDisplay').textContent = `Inicio: ${videoStartTime.toFixed(2)}s`;
+            }
+        });
+        document.getElementById('btnVidSeekBack10').addEventListener('click', () => { if (backgroundMedia?.tagName === 'VIDEO') bgVideoEl.currentTime = Math.max(0, bgVideoEl.currentTime - 10); });
+        document.getElementById('btnVidSeekBack1').addEventListener('click', () => { if (backgroundMedia?.tagName === 'VIDEO') bgVideoEl.currentTime = Math.max(0, bgVideoEl.currentTime - 1); });
+        document.getElementById('btnVidSeekFwd1').addEventListener('click', () => { if (backgroundMedia?.tagName === 'VIDEO') bgVideoEl.currentTime = Math.min(bgVideoEl.duration || 9999, bgVideoEl.currentTime + 1); });
+        document.getElementById('btnVidSeekFwd10').addEventListener('click', () => { if (backgroundMedia?.tagName === 'VIDEO') bgVideoEl.currentTime = Math.min(bgVideoEl.duration || 9999, bgVideoEl.currentTime + 10); });
+
+        // Music Controls
+        cortinaMusicalEl.addEventListener('loadedmetadata', () => {
+            document.getElementById('musSlider').max = cortinaMusicalEl.duration;
+            document.getElementById('musDuration').textContent = formatTime(cortinaMusicalEl.duration);
+        });
+        cortinaMusicalEl.addEventListener('timeupdate', () => {
+            if (!document.getElementById('musSlider').dragging) {
+                document.getElementById('musSlider').value = cortinaMusicalEl.currentTime;
+            }
+            document.getElementById('musCurrentTime').textContent = formatTime(cortinaMusicalEl.currentTime);
+        });
+        document.getElementById('musSlider').addEventListener('mousedown', () => { document.getElementById('musSlider').dragging = true; });
+        document.getElementById('musSlider').addEventListener('touchstart', () => { document.getElementById('musSlider').dragging = true; });
+        document.getElementById('musSlider').addEventListener('mouseup', () => {
+            document.getElementById('musSlider').dragging = false;
+            cortinaMusicalEl.currentTime = parseFloat(document.getElementById('musSlider').value);
+        });
+        document.getElementById('musSlider').addEventListener('touchend', () => {
+            document.getElementById('musSlider').dragging = false;
+            cortinaMusicalEl.currentTime = parseFloat(document.getElementById('musSlider').value);
+        });
+        document.getElementById('musSlider').addEventListener('input', () => {
+            document.getElementById('musCurrentTime').textContent = formatTime(parseFloat(document.getElementById('musSlider').value));
+            if (cortinaMusicalEl.paused) cortinaMusicalEl.currentTime = parseFloat(document.getElementById('musSlider').value);
+        });
+        document.getElementById('btnMusPreviewPlay').addEventListener('click', () => { if (cortinaMusicalEl.src) cortinaMusicalEl.play(); });
+        document.getElementById('btnMusPreviewPause').addEventListener('click', () => { cortinaMusicalEl.pause(); });
+        document.getElementById('btnMusMarkStart').addEventListener('click', () => {
+            if (cortinaMusicalEl.src) {
+                musicStartTime = cortinaMusicalEl.currentTime;
+                cortinaMusicalEl.pause();
+                document.getElementById('musMarkDisplay').textContent = `Inicio: ${musicStartTime.toFixed(2)}s`;
+            }
+        });
+        document.getElementById('btnMusSeekBack10').addEventListener('click', () => { cortinaMusicalEl.currentTime = Math.max(0, cortinaMusicalEl.currentTime - 10); });
+        document.getElementById('btnMusSeekBack1').addEventListener('click', () => { cortinaMusicalEl.currentTime = Math.max(0, cortinaMusicalEl.currentTime - 1); });
+        document.getElementById('btnMusSeekFwd1').addEventListener('click', () => { cortinaMusicalEl.currentTime = Math.min(cortinaMusicalEl.duration || 9999, cortinaMusicalEl.currentTime + 1); });
+        document.getElementById('btnMusSeekFwd10').addEventListener('click', () => { cortinaMusicalEl.currentTime = Math.min(cortinaMusicalEl.duration || 9999, cortinaMusicalEl.currentTime + 10); });
+
+        function drawBackground() {
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            if (!backgroundMedia) return;
+            if (backgroundMedia.tagName === 'IMG' && !backgroundMedia.complete) return;
+            
+            let mediaWidth = backgroundMedia.videoWidth || backgroundMedia.naturalWidth;
+            let mediaHeight = backgroundMedia.videoHeight || backgroundMedia.naturalHeight;
+            if ((!mediaWidth || !mediaHeight) && backgroundMedia.tagName === 'VIDEO') {
+                mediaWidth = canvas.width; mediaHeight = canvas.height;
+            }
+            if (!mediaWidth || !mediaHeight) return;
+
+            const mediaRatio = mediaWidth / mediaHeight;
+            const canvasRatio = canvas.width / canvas.height;
+            let drawWidth, drawHeight, offsetX, offsetY;
+
+            if (mediaRatio > canvasRatio) {
+                drawWidth = canvas.width; drawHeight = drawWidth / mediaRatio;
+                offsetX = 0; offsetY = (canvas.height - drawHeight) / 2;
+            } else {
+                drawHeight = canvas.height; drawWidth = drawHeight * mediaRatio;
+                offsetX = (canvas.width - drawWidth) / 2; offsetY = 0;
+            }
+            try { ctx.drawImage(backgroundMedia, offsetX, offsetY, drawWidth, drawHeight); } catch (e) {}
+        }
+
+        function drawHeadline() {
+            if (!activarGraficos.checked || !textoTitular.value.trim()) return;
+
+            const padding = canvas.width * 0.04;
+            const bannerHeight = Math.max(60, canvas.height * 0.12);
+            const bannerColor = colorBanda.value;
+            const text = textoTitular.value.trim().toUpperCase();
+
+            // 1. UPPER THIRD: Fecha, Hora y Lugar (Solo texto, sin fondo, con sombra para legibilidad)
+            if (activarFechaLugar.checked && textoFechaLugar.value.trim()) {
+                ctx.font = `bold ${canvas.height * 0.035}px "Segoe UI", Arial, sans-serif`;
+                ctx.fillStyle = '#ffffff';
+                ctx.textBaseline = 'top';
+                ctx.textAlign = 'left';
+                
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                ctx.shadowBlur = 6;
+                ctx.shadowOffsetX = 1;
+                ctx.shadowOffsetY = 1;
+                
+                ctx.fillText(textoFechaLugar.value.trim(), padding, padding, canvas.width - (padding * 2));
+                
+                ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+            }
+
+            // 2. BADGE EN VIVO (Esquina superior derecha)
+            if (activarEnVivo.checked) {
+                const badgeWidth = canvas.width * 0.18;
+                const badgeHeight = canvas.height * 0.06;
+                const badgeX = canvas.width - badgeWidth - padding;
+                const badgeY = padding;
+                
+                ctx.fillStyle = '#dc3545';
+                ctx.fillRect(badgeX, badgeY, badgeWidth, badgeHeight);
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `bold ${canvas.height * 0.035}px "Segoe UI", Arial, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('🔴 EN VIVO', badgeX + (badgeWidth / 2), badgeY + (badgeHeight / 2) + 1);
+            }
+
+            // 3. LOWER THIRD: Titular Principal (Franja de color en la parte inferior para no tapar rostros)
+            ctx.fillStyle = bannerColor;
+            ctx.fillRect(0, canvas.height - bannerHeight, canvas.width, bannerHeight);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${canvas.height * 0.05}px "Segoe UI", Arial, sans-serif`;
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'left';
+            
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+
+            ctx.fillText(text, padding, canvas.height - (bannerHeight / 2), canvas.width - (padding * 2));
+
+            ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+            ctx.textAlign = 'left';
+        }
+
+        function draw() {
+            if (!isPlaying && !backgroundMedia) return;
+            animationId = requestAnimationFrame(draw);
+            
+            drawBackground();
+
+            if (isPlaying && analyser && voiceStarted && !audioEnded) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const efecto = selectorEfecto.value;
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+
+                if (efecto === 'ondas_suaves') {
+                    analyser.getByteTimeDomainData(dataArray);
+                    ctx.beginPath();
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = '#00d2ff';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#00d2ff';
+                    const sliceWidth = canvas.width / bufferLength;
+                    let x = 0;
+                    for (let i = 0; i < bufferLength; i++) {
+                        const v = dataArray[i] / 128.0;
+                        const y = (v * canvas.height) / 2;
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                        x += sliceWidth;
+                    }
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                } else {
+                    analyser.getByteFrequencyData(dataArray);
+                    if (efecto === 'barras') {
+                        const maxBarHeight = canvas.height * 0.40;
+                        const barWidth = (canvas.width / bufferLength) * 2.5;
+                        let x = 0;
+                        for (let i = 0; i < bufferLength; i++) {
+                            const barHeight = (dataArray[i] / 255) * maxBarHeight;
+                            const r = barHeight + 25 * (i / bufferLength);
+                            const g = 250 * (i / bufferLength);
+                            const b = 50;
+                            ctx.fillStyle = `rgb(${r},${g},${b})`;
+                            ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                            x += barWidth + 1;
+                        }
+                    } else if (efecto === 'circulos' || efecto === 'particulas') {
+                        const centerX = canvas.width / 2;
+                        const centerY = canvas.height / 2;
+                        const activeBins = 64;
+                        for (let i = 0; i < activeBins; i++) {
+                            const angle = (i / activeBins) * Math.PI * 2;
+                            const radius = (dataArray[i] / 255) * (Math.min(canvas.width, canvas.height) / 2.5);
+                            if (efecto === 'circulos') {
+                                ctx.beginPath();
+                                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                                ctx.strokeStyle = `hsl(${i * 4}, 100%, 60%)`;
+                                ctx.lineWidth = 2;
+                                ctx.shadowBlur = 5;
+                                ctx.shadowColor = `hsl(${i * 4}, 100%, 60%)`;
+                                ctx.stroke();
+                            } else if (efecto === 'particulas') {
+                                const x = centerX + Math.cos(angle) * radius;
+                                const y = centerY + Math.sin(angle) * radius;
+                                ctx.beginPath();
+                                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                                ctx.fillStyle = `hsl(${i * 4}, 100%, 70%)`;
+                                ctx.shadowBlur = 8;
+                                ctx.shadowColor = `hsl(${i * 4}, 100%, 70%)`;
+                                ctx.fill();
+                            }
+                        }
+                        ctx.shadowBlur = 0;
+                    }
+                }
+            }
+
+            drawHeadline();
+        }
+
+        function stopRecordingAndDownload() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+            if (autoStopTimeout) { clearTimeout(autoStopTimeout); autoStopTimeout = null; }
+            if (introDelayTimeout) { clearTimeout(introDelayTimeout); introDelayTimeout = null; }
+            
+            isRecording = false;
+            isPlaying = false;
+            audioEnded = false;
+            voiceStarted = false;
+            timerDisplay.textContent = '';
+            btnExportar.textContent = '💾 Exportar';
+            btnExportar.classList.remove('btn-stop');
+            btnExportar.classList.add('btn-export');
+            btnExportar.disabled = false;
+            btnReproducir.disabled = false;
+            btnDetener.disabled = false;
+        }
+
+        function showVideoModal(url, fileName) {
+            currentBlobUrl = url;
+            currentFileName = fileName;
+            document.getElementById('modalVideo').src = url;
+            document.getElementById('videoModal').style.display = 'flex';
+        }
+
+        document.getElementById('btnModalClose').addEventListener('click', () => {
+            document.getElementById('videoModal').style.display = 'none';
+            document.getElementById('modalVideo').src = '';
+            if (currentBlobUrl) { URL.revokeObjectURL(currentBlobUrl); currentBlobUrl = null; }
+        });
+
+        document.getElementById('btnModalDownload').addEventListener('click', () => {
+            if (currentBlobUrl) {
+                const a = document.createElement('a');
+                a.href = currentBlobUrl;
+                a.download = currentFileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+        });
+
+        btnExportar.addEventListener('click', async () => {
+            if (!isRecording) {
+                if (!audioPrincipalEl.src && !(backgroundMedia && backgroundMedia.tagName === 'VIDEO')) {
+                    alert('Debes cargar al menos un video o audio para exportar.');
+                    return;
+                }
+
+                try {
+                    setupAudio();
+                    if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+                    if (!audioPrincipalEl.src && videoGainNode && audioCtx) {
+                        videoGainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+                        videoGainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
+                        sliderVolumenVideo.value = 100;
+                        volVidValue.textContent = '100';
+                    }
+
+                    const canvasStream = canvas.captureStream(30);
+                    const combinedStream = new MediaStream([
+                        ...canvasStream.getVideoTracks(),
+                        ...audioDestination.stream.getAudioTracks()
+                    ]);
+
+                    const mimeTypes = ['video/mp4;codecs=h264', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+                    let selectedMimeType = '';
+                    for (let type of mimeTypes) {
+                        if (MediaRecorder.isTypeSupported(type)) {
+                            selectedMimeType = type;
+                            break;
+                        }
+                    }
+
+                    if (!selectedMimeType) {
+                        alert('Tu navegador no soporta la grabación de video.');
+                        return;
+                    }
+
+                    mediaRecorder = new MediaRecorder(combinedStream, { mimeType: selectedMimeType, videoBitsPerSecond: 5000000 });
+                    recordedChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => { if (event.data.size > 0) recordedChunks.push(event.data); };
+
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(recordedChunks, { type: selectedMimeType });
+                        const fileExtension = selectedMimeType.includes('mp4') ? 'mp4' : 'webm';
+                        const fileName = `reportaje-${Date.now()}.${fileExtension}`;
+                        const file = new File([blob], fileName, { type: selectedMimeType });
+
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            navigator.share({ files: [file], title: 'Reportaje Te Lo Cuento' }).catch(() => {
+                                showVideoModal(URL.createObjectURL(blob), fileName);
+                            });
+                        } else {
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = url;
+                            a.download = fileName;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            showVideoModal(url, fileName);
+                        }
+                        timerDisplay.textContent = '✅ Video procesado y guardado.';
+                        setTimeout(() => { timerDisplay.textContent = ''; }, 3000);
+                    };
+
+                    mediaRecorder.start(1000);
+                    isRecording = true;
+                    
+                    btnExportar.textContent = '⏹ Grabando...';
+                    btnExportar.classList.remove('btn-export');
+                    btnExportar.classList.add('btn-stop');
+                    btnExportar.disabled = true;
+                    btnReproducir.disabled = true;
+                    btnDetener.disabled = false;
+                    
+                    audioPrincipalEl.currentTime = 0;
+                    audioEnded = false;
+                    voiceStarted = false;
+                    
+                    if (backgroundMedia && backgroundMedia.tagName === 'VIDEO') {
+                        backgroundMedia.currentTime = videoStartTime;
+                        backgroundMedia.loop = true;
+                        backgroundMedia.play().catch(err => console.error("Error video:", err));
+                    }
+                    if (cortinaMusicalEl.src) {
+                        cortinaMusicalEl.currentTime = musicStartTime;
+                        cortinaMusicalEl.loop = true;
+                        cortinaMusicalEl.play();
+                    }
+                    
+                    isPlaying = true;
+                    draw();
+
+                    const introDelay = parseInt(selectorIntroVisual.value) || 0;
+                    if (audioPrincipalEl.src) {
+                        introDelayTimeout = setTimeout(() => {
+                            if (isRecording) {
+                                voiceStarted = true;
+                                audioPrincipalEl.play();
+                            }
+                        }, introDelay * 1000);
+                    }
+                    
+                    let duracionVideoNatural = 9999;
+                    if (backgroundMedia && backgroundMedia.tagName === 'VIDEO' && backgroundMedia.duration) {
+                        duracionVideoNatural = (backgroundMedia.duration - videoStartTime) + introDelay;
+                    }
+                    
+                    let duracionMaxima = 9999;
+                    const duracionMaxValor = selectorDuracionMaxima.value;
+                    if (duracionMaxValor !== 'completa') {
+                        duracionMaxima = parseInt(duracionMaxValor);
+                    }
+
+                    const duracionTotal = Math.min(duracionVideoNatural, duracionMaxima);
+                    
+                    const handleAudioEnd = () => {
+                        audioEnded = true;
+                        timerDisplay.textContent = '🎵 Voz finalizada. Continuando con el reportaje...';
+                        audioPrincipalEl.removeEventListener('ended', handleAudioEnd);
+                    };
+                    if (audioPrincipalEl.src) audioPrincipalEl.addEventListener('ended', handleAudioEnd);
+                    
+                    autoStopTimeout = setTimeout(() => {
+                        timerDisplay.textContent = '⏹ Finalizando grabación...';
+                        stopRecordingAndDownload();
+                    }, duracionTotal * 1000);
+                    
+                } catch (err) {
+                    console.error('Error al iniciar grabación:', err);
+                    alert('Error al iniciar la grabación: ' + err.message);
+                    isRecording = false;
+                    btnExportar.textContent = '💾 Exportar';
+                    btnExportar.classList.remove('btn-stop');
+                    btnExportar.classList.add('btn-export');
+                    btnExportar.disabled = false;
+                    btnReproducir.disabled = false;
+                }
+            } else {
+                timerDisplay.textContent = '⏹ Deteniendo grabación manualmente...';
+                stopRecordingAndDownload();
+            }
+        });
+
+        btnReproducir.addEventListener('click', async () => {
+            setupAudio();
+            if (audioCtx.state === 'suspended') await audioCtx.resume();
+            audioEnded = false;
+            voiceStarted = false;
+            
+            if (!audioPrincipalEl.src && videoGainNode && audioCtx) {
+                videoGainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+                videoGainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
+                sliderVolumenVideo.value = 100;
+                volVidValue.textContent = '100';
+            }
+            
+            const introDelay = parseInt(selectorIntroVisual.value) || 0;
+
+            if (backgroundMedia && backgroundMedia.tagName === 'VIDEO') {
+                backgroundMedia.currentTime = videoStartTime;
+                backgroundMedia.loop = true;
+                backgroundMedia.play().catch(err => console.error("Error video:", err));
+            }
+            if (cortinaMusicalEl.src) {
+                cortinaMusicalEl.currentTime = musicStartTime;
+                cortinaMusicalEl.loop = true;
+                cortinaMusicalEl.play();
+            }
+            
+            isPlaying = true;
+            draw();
+
+            if (audioPrincipalEl.src) {
+                introDelayTimeout = setTimeout(() => {
+                    if (isPlaying) {
+                        voiceStarted = true;
+                        audioPrincipalEl.play();
+                    }
+                }, introDelay * 1000);
+            }
+            
+            const handleAudioEndPreview = () => {
+                audioEnded = true;
+                timerDisplay.textContent = '🎵 Voz finalizada. Continuando con el reportaje...';
+                audioPrincipalEl.removeEventListener('ended', handleAudioEndPreview);
+            };
+            if (audioPrincipalEl.src) audioPrincipalEl.addEventListener('ended', handleAudioEndPreview);
+        });
+
+        btnDetener.addEventListener('click', () => {
+            if (isRecording) stopRecordingAndDownload();
+            isPlaying = false;
+            audioEnded = false;
+            voiceStarted = false;
+            cancelAnimationFrame(animationId);
+            audioPrincipalEl.pause();
+            if (backgroundMedia && backgroundMedia.tagName === 'VIDEO') backgroundMedia.pause();
+            if (cortinaMusicalEl.src) cortinaMusicalEl.pause();
+            if (introDelayTimeout) { clearTimeout(introDelayTimeout); introDelayTimeout = null; }
+            timerDisplay.textContent = '';
+            drawBackground();
+        });
+
+        btnReiniciar.addEventListener('click', () => {
+            if (isRecording) stopRecordingAndDownload();
+            isPlaying = false;
+            audioEnded = false;
+            voiceStarted = false;
+            cancelAnimationFrame(animationId);
+            audioPrincipalEl.pause();
+            if (backgroundMedia && backgroundMedia.tagName === 'VIDEO') backgroundMedia.pause();
+            if (cortinaMusicalEl.src) cortinaMusicalEl.pause();
+            
+            audioPrincipalEl.currentTime = 0;
+            if (backgroundMedia && backgroundMedia.tagName === 'VIDEO') backgroundMedia.currentTime = 0;
+            if (cortinaMusicalEl.src) cortinaMusicalEl.currentTime = 0;
+            
+            videoStartTime = 0;
+            musicStartTime = 0;
+            document.getElementById('vidMarkDisplay').textContent = 'Inicio: 0.00s';
+            document.getElementById('musMarkDisplay').textContent = 'Inicio: 0.00s';
+            document.getElementById('vidSlider').value = 0;
+            document.getElementById('vidCurrentTime').textContent = '0:00';
+            
+            if (introDelayTimeout) { clearTimeout(introDelayTimeout); introDelayTimeout = null; }
+            
+            audioPrincipalEl.volume = 1.0;
+            if (backgroundMedia && backgroundMedia.tagName === 'VIDEO') backgroundMedia.volume = 1.0;
+            if (cortinaMusicalEl.src) cortinaMusicalEl.volume = 1.0;
+            
+            if (videoGainNode && audioCtx) videoGainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            if (musicGainNode && audioCtx) musicGainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            
+            sliderVolumenVideo.value = 30; volVidValue.textContent = '30';
+            sliderVolumenCortina.value = 20; volMusValue.textContent = '20';
+            
+            selectorEfecto.value = 'barras';
+            timerDisplay.textContent = '';
+            drawBackground();
+        });
+    </script>
+</body>
+</html>
